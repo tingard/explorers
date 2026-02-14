@@ -408,7 +408,9 @@ fn run_mcts() -> anyhow::Result<()> {
         println!("{:?} to play", state.player());
         // Define a computational budget which we must not exceed
         let run_till = Instant::now() + Duration::from_millis(100);
+        let mut n_rollouts = 0;
         while Instant::now() < run_till {
+            n_rollouts += 1;
             // Selection
             // Given our available actions at the current node, choose a leaf node.
             // A leaf node is any node that has a potential child from which no simulation
@@ -474,7 +476,12 @@ fn run_mcts() -> anyhow::Result<()> {
         let chosen_action = selection_policy
             .select_action(&state, &actions)
             .expect("Can select action");
-        println!("{:?} will play {}", state.player(), chosen_action.position);
+        println!(
+            "{:?} will play {} ({} rollouts)",
+            state.player(),
+            chosen_action.position,
+            n_rollouts
+        );
         let transition = env.step(&state, &chosen_action).expect("Can step");
         state = transition.new_state;
         let TransitionType::Running = &transition.transition_type else {

@@ -108,7 +108,7 @@ impl<const WIDTH: usize, const HEIGHT: usize> GridWorld<WIDTH, HEIGHT> {
         if let Some((kx, ky)) = self.key_location {
             let dx = kx.checked_sub(x).unwrap_or(0);
             let dy = ky.checked_sub(y).unwrap_or(0);
-            if dx.abs() <= DX.div(2) && dy.abs() <= DY.div(2) {
+            if dx <= DX.div(2) && dy <= DY.div(2) {
                 perception[dx + DX.div(2)][dy + DY.div(2)] = 2;
             }
         }
