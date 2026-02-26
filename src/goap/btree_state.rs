@@ -50,16 +50,16 @@ impl BTreeState {
     /// If the map did not have this key present, None is returned.
     ///
     ///If the map did have this key present, the value is updated, and the old value is returned.
-    pub fn insert<S: ToString>(&mut self, key: S, value: Value) -> Option<Value> {
+    pub fn insert(&mut self, key: impl ToString, value: Value) -> Option<Value> {
         self.0.insert(key.to_string(), value)
     }
 
-    pub fn update<S, F>(&mut self, key: S, f: F) -> Option<Value>
-    where
-        S: ToString,
-        F: FnOnce(&mut Value) -> Option<Value>,
-    {
-        self.0.get_mut(&key.to_string()).and_then(|v| f(v))
+    pub fn update(
+        &mut self,
+        key: impl ToString,
+        f: impl FnOnce(&mut Value) -> Option<Value>,
+    ) -> Option<Value> {
+        self.0.get_mut(&key.to_string()).and_then(f)
     }
 
     /// Returns a reference to the value corresponding to the key.

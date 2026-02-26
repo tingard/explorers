@@ -108,6 +108,7 @@ impl HexNav {
             .expect("Is valid coordinate")
             .to_cell(hex_resolution);
         // Perform A* search with string pulling to determine the path
+        // TODO: Theta-star
         let result = astar()
             .get_neighbors(|c: &CellIndex| {
                 c.edges()
