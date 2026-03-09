@@ -22,19 +22,63 @@ enum TicTacToePlayer {
 }
 
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
-struct TicTacToeState {
-    pub tl: Option<TicTacToePlayer>,
-    pub tc: Option<TicTacToePlayer>,
-    pub tr: Option<TicTacToePlayer>,
-    pub cl: Option<TicTacToePlayer>,
-    pub cc: Option<TicTacToePlayer>,
-    pub cr: Option<TicTacToePlayer>,
-    pub bl: Option<TicTacToePlayer>,
-    pub bc: Option<TicTacToePlayer>,
-    pub br: Option<TicTacToePlayer>,
-}
+struct TicTacToeState([[Option<TicTacToePlayer>; 3]; 3]);
 
 impl TicTacToeState {
+    fn tl(&self) -> &Option<TicTacToePlayer> {
+        &self.0[0][0]
+    }
+    fn set_tl(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[0][0] = val;
+    }
+    fn tc(&self) -> &Option<TicTacToePlayer> {
+        &self.0[0][1]
+    }
+    fn set_tc(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[0][1] = val;
+    }
+    fn tr(&self) -> &Option<TicTacToePlayer> {
+        &self.0[0][2]
+    }
+    fn set_tr(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[0][2] = val;
+    }
+    fn cl(&self) -> &Option<TicTacToePlayer> {
+        &self.0[1][0]
+    }
+    fn set_cl(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[1][0] = val;
+    }
+    fn cc(&self) -> &Option<TicTacToePlayer> {
+        &self.0[1][1]
+    }
+    fn set_cc(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[1][1] = val;
+    }
+    fn cr(&self) -> &Option<TicTacToePlayer> {
+        &self.0[1][2]
+    }
+    fn set_cr(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[1][2] = val;
+    }
+    fn bl(&self) -> &Option<TicTacToePlayer> {
+        &self.0[2][0]
+    }
+    fn set_bl(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[2][0] = val;
+    }
+    fn bc(&self) -> &Option<TicTacToePlayer> {
+        &self.0[2][1]
+    }
+    fn set_bc(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[2][1] = val;
+    }
+    fn br(&self) -> &Option<TicTacToePlayer> {
+        &self.0[2][2]
+    }
+    fn set_br(&mut self, val: Option<TicTacToePlayer>) {
+        self.0[2][2] = val;
+    }
     fn as_bits(val: &Option<TicTacToePlayer>) -> u8 {
         match val {
             None => 0,
@@ -44,15 +88,12 @@ impl TicTacToeState {
     }
 
     fn player(&self) -> TicTacToePlayer {
-        let n_moves_played = (self.tl.is_some() as u32)
-            + (self.tc.is_some() as u32)
-            + (self.tr.is_some() as u32)
-            + (self.cl.is_some() as u32)
-            + (self.cc.is_some() as u32)
-            + (self.cr.is_some() as u32)
-            + (self.bl.is_some() as u32)
-            + (self.bc.is_some() as u32)
-            + (self.br.is_some() as u32);
+        let n_moves_played: u32 = self
+            .0
+            .iter()
+            .flatten()
+            .map(|v| u32::from(v.is_some()))
+            .sum();
         match n_moves_played % 2 == 0 {
             true => TicTacToePlayer::Noughts,
             false => TicTacToePlayer::Crosses,
@@ -60,29 +101,24 @@ impl TicTacToeState {
     }
 
     fn is_full(&self) -> bool {
-        self.tl.is_some()
-            && self.tc.is_some()
-            && self.tr.is_some()
-            && self.cl.is_some()
-            && self.cc.is_some()
-            && self.cr.is_some()
-            && self.bl.is_some()
-            && self.bc.is_some()
-            && self.br.is_some()
+        self.0.iter().flatten().all(|v| v.is_some())
+    }
+    fn is_terminal(&self) -> bool {
+        self.winner().is_some() || self.is_full()
     }
     fn winner(&self) -> Option<TicTacToePlayer> {
         [
             // Rows
-            (&self.tl, &self.tc, &self.tr),
-            (&self.cl, &self.cc, &self.cr),
-            (&self.bl, &self.bc, &self.br),
+            (self.tl(), self.tc(), self.tr()),
+            (self.cl(), self.cc(), self.cr()),
+            (self.bl(), self.bc(), self.br()),
             // Cols
-            (&self.tl, &self.cl, &self.bl),
-            (&self.tc, &self.cc, &self.bc),
-            (&self.tr, &self.cr, &self.br),
+            (self.tl(), self.cl(), self.bl()),
+            (self.tc(), self.cc(), self.bc()),
+            (self.tr(), self.cr(), self.br()),
             // Diags
-            (&self.tl, &self.cc, &self.br),
-            (&self.tr, &self.cc, &self.bl),
+            (self.tl(), self.cc(), self.br()),
+            (self.tr(), self.cc(), self.bl()),
         ]
         .into_iter()
         .filter_map(|(i, j, k)| {
@@ -95,7 +131,7 @@ impl TicTacToeState {
         .next()
     }
 
-    fn repr_pos(pos: Option<TicTacToePlayer>) -> &'static str {
+    fn repr_pos(pos: &Option<TicTacToePlayer>) -> &'static str {
         match pos {
             Some(TicTacToePlayer::Noughts) => "O",
             Some(TicTacToePlayer::Crosses) => "X",
@@ -109,23 +145,23 @@ impl std::fmt::Display for TicTacToeState {
         let mut board = String::new();
         board.push_str(&format!(
             " {} | {} | {} \n",
-            Self::repr_pos(self.tl),
-            Self::repr_pos(self.tc),
-            Self::repr_pos(self.tr)
+            Self::repr_pos(self.tl()),
+            Self::repr_pos(self.tc()),
+            Self::repr_pos(self.tr())
         ));
         board.push_str(&format!("---+---+---\n"));
         board.push_str(&format!(
             " {} | {} | {} \n",
-            Self::repr_pos(self.cl),
-            Self::repr_pos(self.cc),
-            Self::repr_pos(self.cr)
+            Self::repr_pos(self.cl()),
+            Self::repr_pos(self.cc()),
+            Self::repr_pos(self.cr())
         ));
         board.push_str(&format!("---+---+---\n"));
         board.push_str(&format!(
             " {} | {} | {} \n",
-            Self::repr_pos(self.bl),
-            Self::repr_pos(self.bc),
-            Self::repr_pos(self.br)
+            Self::repr_pos(self.bl()),
+            Self::repr_pos(self.bc()),
+            Self::repr_pos(self.br())
         ));
         write!(f, "{}", board)
     }
@@ -135,20 +171,16 @@ impl State for TicTacToeState {
     type Key = [u8; 3];
 
     fn key(&self) -> [u8; 3] {
-        let b0 = Self::as_bits(&self.tl) << 6
-            | Self::as_bits(&self.tc) << 4
-            | Self::as_bits(&self.tr) << 2
-            | Self::as_bits(&self.cl);
-        let b1 = Self::as_bits(&self.cc) << 6
-            | Self::as_bits(&self.cr) << 4
-            | Self::as_bits(&self.bl) << 2
-            | Self::as_bits(&self.bc);
-        let b2 = Self::as_bits(&self.br) << 6;
+        let b0 = Self::as_bits(&self.tl()) << 6
+            | Self::as_bits(&self.tc()) << 4
+            | Self::as_bits(&self.tr()) << 2
+            | Self::as_bits(&self.cl());
+        let b1 = Self::as_bits(&self.cc()) << 6
+            | Self::as_bits(&self.cr()) << 4
+            | Self::as_bits(&self.bl()) << 2
+            | Self::as_bits(&self.bc());
+        let b2 = Self::as_bits(&self.br()) << 6;
         return [b0, b1, b2];
-    }
-
-    fn is_terminal(&self) -> bool {
-        self.winner().is_some() || self.is_full()
     }
 }
 
@@ -244,58 +276,58 @@ impl Environment for TicTacToeEnvironment {
 
         match &action.position {
             TicTacToePosition::TopLeft => {
-                if new_state.tl.is_some() {
+                if new_state.tl().is_some() {
                     return Err(anyhow::anyhow!("position already filled: TopLeft"));
                 }
-                new_state.tl = Some(action.player);
+                new_state.set_tl(Some(action.player));
             }
             TicTacToePosition::TopCenter => {
-                if new_state.tc.is_some() {
+                if new_state.tc().is_some() {
                     return Err(anyhow::anyhow!("position already filled: TopCenter"));
                 }
-                new_state.tc = Some(action.player);
+                new_state.set_tc(Some(action.player));
             }
             TicTacToePosition::TopRight => {
-                if new_state.tr.is_some() {
+                if new_state.tr().is_some() {
                     return Err(anyhow::anyhow!("position already filled: TopRight"));
                 }
-                new_state.tr = Some(action.player);
+                new_state.set_tr(Some(action.player));
             }
             TicTacToePosition::CenterLeft => {
-                if new_state.cl.is_some() {
+                if new_state.cl().is_some() {
                     return Err(anyhow::anyhow!("position already filled: CenterLeft"));
                 }
-                new_state.cl = Some(action.player);
+                new_state.set_cl(Some(action.player));
             }
             TicTacToePosition::Center => {
-                if new_state.cc.is_some() {
+                if new_state.cc().is_some() {
                     return Err(anyhow::anyhow!("position already filled: Center"));
                 }
-                new_state.cc = Some(action.player);
+                new_state.set_cc(Some(action.player));
             }
             TicTacToePosition::CenterRight => {
-                if new_state.cr.is_some() {
+                if new_state.cr().is_some() {
                     return Err(anyhow::anyhow!("position already filled: CenterRight"));
                 }
-                new_state.cr = Some(action.player);
+                new_state.set_cr(Some(action.player));
             }
             TicTacToePosition::BottomLeft => {
-                if new_state.bl.is_some() {
+                if new_state.bl().is_some() {
                     return Err(anyhow::anyhow!("position already filled: BottomLeft"));
                 }
-                new_state.bl = Some(action.player);
+                new_state.set_bl(Some(action.player));
             }
             TicTacToePosition::BottomCenter => {
-                if new_state.bc.is_some() {
+                if new_state.bc().is_some() {
                     return Err(anyhow::anyhow!("position already filled: BottomCenter"));
                 }
-                new_state.bc = Some(action.player);
+                new_state.set_bc(Some(action.player));
             }
             TicTacToePosition::BottomRight => {
-                if new_state.br.is_some() {
+                if new_state.br().is_some() {
                     return Err(anyhow::anyhow!("position already filled: BottomRight"));
                 }
-                new_state.br = Some(action.player);
+                new_state.set_br(Some(action.player));
             }
         }
         match (new_state.is_terminal(), new_state.winner()) {
@@ -332,15 +364,15 @@ impl Environment for TicTacToeEnvironment {
         let mut allowed_actions: Vec<TicTacToeAction> = Vec::with_capacity(9);
         let player = state.player();
         for (slot, position) in [
-            (&state.tl, TicTacToePosition::TopLeft),
-            (&state.tc, TicTacToePosition::TopCenter),
-            (&state.tr, TicTacToePosition::TopRight),
-            (&state.cl, TicTacToePosition::CenterLeft),
-            (&state.cc, TicTacToePosition::Center),
-            (&state.cr, TicTacToePosition::CenterRight),
-            (&state.bl, TicTacToePosition::BottomLeft),
-            (&state.bc, TicTacToePosition::BottomCenter),
-            (&state.br, TicTacToePosition::BottomRight),
+            (&state.tl(), TicTacToePosition::TopLeft),
+            (&state.tc(), TicTacToePosition::TopCenter),
+            (&state.tr(), TicTacToePosition::TopRight),
+            (&state.cl(), TicTacToePosition::CenterLeft),
+            (&state.cc(), TicTacToePosition::Center),
+            (&state.cr(), TicTacToePosition::CenterRight),
+            (&state.bl(), TicTacToePosition::BottomLeft),
+            (&state.bc(), TicTacToePosition::BottomCenter),
+            (&state.br(), TicTacToePosition::BottomRight),
         ] {
             if slot.is_none() {
                 allowed_actions.push(TicTacToeAction::new(player, position));
@@ -407,7 +439,7 @@ fn run_mcts() -> anyhow::Result<()> {
         println!("State is\n{state}");
         println!("{:?} to play", state.player());
         // Define a computational budget which we must not exceed
-        let run_till = Instant::now() + Duration::from_millis(100);
+        let run_till = Instant::now() + Duration::from_millis(500);
         let mut n_rollouts = 0;
         while Instant::now() < run_till {
             n_rollouts += 1;

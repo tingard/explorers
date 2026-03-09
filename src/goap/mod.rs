@@ -1,6 +1,6 @@
 mod action;
 mod btree_state;
-mod state;
+mod goap_state;
 mod value;
 
 use bon::bon;
@@ -9,7 +9,7 @@ use std::{fmt::Debug, marker::PhantomData, ops::Neg};
 use tracing::debug;
 
 pub use self::action::Action;
-pub use self::state::State;
+pub use self::goap_state::State;
 use super::astar;
 use crate::astar::EdgeToNodeWithCost;
 pub use btree_state::BTreeState;
@@ -52,7 +52,7 @@ where
 }
 
 #[bon]
-impl<S: State, A, G, C> Planner<S, A, G, C>
+impl<S, A, G, C> Planner<S, A, G, C>
 where
     S: State,
     A: Action<S, Cost = C> + Clone,
