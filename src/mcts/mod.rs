@@ -19,13 +19,8 @@ pub struct MCTSNode<E: Environment> {
     pub playouts: u32,
     pub value_sum: f32,
     /// Child state keys
-    /// TODO: Action information?
+    /// TODO: Condense this type
     pub simulated_actions: HashSet<<<E as Environment>::Action as Action>::Key>,
-    //
-    // @CR: suggestion (non-blocking): The nested associated type `HashSet<<<E as Environment>::Action as Action>::Key>`
-    // is quite verbose because of the trait bounds. Consider introducing a type alias in this
-    // module (e.g. `type ActionKey<E> = <E as Environment>::Action::Key;`) to improve readability
-    // because long types reduce clarity when scanning the code.
 }
 
 impl<E: Environment> Default for MCTSNode<E> {
@@ -121,11 +116,6 @@ where
         action: <<E as Environment>::Action as Action>::Key,
     ) {
         // TODO: Return a result if not found
-        //
-        // @CR: todo: Consider returning a `Result` when the provided `state` isn't present
-        // in `store` because silently inserting a default node (`or_default`) may hide bugs
-        // in callers that expect the state to already exist. Returning an error makes misuse
-        // easier to detect and reason about.
         let node = self.store.entry(state).or_default();
         node.simulated_actions.insert(action);
     }
@@ -134,11 +124,5 @@ where
         let node = self.store.entry(state).or_default();
         node.playouts += 1;
         node.value_sum += reward;
-
-        // @CR: suggestion (non-blocking): If this store will ever be accessed concurrently,
-        // consider making `playouts` and `value_sum` updates atomic or protecting the store
-        // with a mutex because simultaneous updates can lead to lost increments and subtle
-        // bugs. Also consider whether `f64` precision is desirable over `f32` for aggregated
-        // rewards because reducing rounding error can matter over many playouts.
     }
 }
