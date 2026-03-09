@@ -1,5 +1,7 @@
 // TODO: Function using h3 as a navigation mesh
 mod bearings;
+pub mod hex;
+
 pub mod string_pull;
 use anyhow::anyhow;
 use geo::{BoundingRect, Centroid, algorithm::bool_ops::BooleanOps};
@@ -71,7 +73,7 @@ impl HexNav {
                     break;
                 };
                 // Store this as an output cell if it is contained within the polygon
-                if crate::hex::is_cell_contained_in_in_geometry(to_check, polygon) {
+                if self::hex::is_cell_contained_in_in_geometry(to_check, polygon) {
                     out.insert(to_check);
                 }
                 // For each new neighboring cell
@@ -82,7 +84,7 @@ impl HexNav {
                     // Log this cell as seen
                     seen_hexes.insert(neighbor);
                     // Add this cell to the search queue so any of its neighbors get searched
-                    if crate::hex::is_cell_contained_in_in_geometry(neighbor, &bounds) {
+                    if self::hex::is_cell_contained_in_in_geometry(neighbor, &bounds) {
                         search_queue.push_back(neighbor);
                     }
                 }
@@ -114,9 +116,9 @@ impl HexNav {
                 c.edges()
                     .filter_map(|e| {
                         let dest = e.destination();
-                        if crate::hex::is_cell_contained_in_in_geometry(dest, geofence) {
+                        if self::hex::is_cell_contained_in_in_geometry(dest, geofence) {
                             // TODO: String-pulled distance
-                            let distance = crate::hex::hex_center_distance(*c, dest) as i32;
+                            let distance = self::hex::hex_center_distance(*c, dest) as i32;
                             Some(EdgeToNodeWithCost::new((), dest, distance))
                         } else {
                             None
@@ -125,10 +127,10 @@ impl HexNav {
                     .collect()
             })
             .is_goal(|c: &CellIndex, g: &CellIndex| c == g)
-            .heuristic(|c, g| crate::hex::hex_center_distance(*c, *g) as i32)
+            .heuristic(|c, g| self::hex::hex_center_distance(*c, *g) as i32)
             .plan_path(&start_cell, &end_cell)?;
         let hexes: Vec<_> = result.path.into_iter().map(|(_, hex)| hex).collect();
-        let portals: anyhow::Result<Vec<_>> = crate::hex::hexes_to_portals(&hexes).collect();
+        let portals: anyhow::Result<Vec<_>> = self::hex::hexes_to_portals(&hexes).collect();
         string_pull_geo(portals?, start, end)
     }
 }
@@ -138,7 +140,7 @@ mod tests {
     use geo::Contains;
     use h3o::Resolution;
 
-    use crate::hex::cell_as_polygon;
+    use super::hex::cell_as_polygon;
 
     use super::HexNav;
 

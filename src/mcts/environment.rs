@@ -1,5 +1,5 @@
 use super::action::Action;
-use super::state::State;
+use super::mcts_state::State;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransitionType {

@@ -1,7 +1,7 @@
 use crate::mcts::MCTSStore;
 
 use super::environment::Environment;
-use super::state::State;
+use super::mcts_state::State;
 use anyhow::Context;
 use rand::prelude::*;
 
@@ -148,10 +148,6 @@ mod tests {
 
         fn key(&self) -> Self::Key {
             [self.0]
-        }
-
-        fn is_terminal(&self) -> bool {
-            false
         }
     }
 

@@ -1,7 +1,7 @@
 mod action;
 mod environment;
+mod mcts_state;
 pub mod policy;
-mod state;
 pub mod uct;
 
 use std::collections::{HashMap, HashSet};
@@ -10,8 +10,8 @@ use anyhow::Context;
 
 pub use self::action::Action;
 pub use self::environment::{Environment, EnvironmentTransition, TransitionType};
+pub use self::mcts_state::State;
 use self::policy::ActionPolicy;
-pub use self::state::State;
 
 #[derive(Clone)]
 pub struct MCTSNode<E: Environment> {
