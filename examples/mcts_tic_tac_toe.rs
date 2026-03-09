@@ -104,7 +104,7 @@ impl TicTacToeState {
         self.0.iter().flatten().all(|v| v.is_some())
     }
     fn is_terminal(&self) -> bool {
-        self.winner().is_some() || self.is_full()
+        self.is_full() || self.winner().is_some()
     }
     fn winner(&self) -> Option<TicTacToePlayer> {
         [
