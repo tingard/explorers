@@ -317,7 +317,7 @@ mod tests {
 
     #[test]
     fn adjacency_graph_prefer_small_steps() {
-        let adj = vec![
+        let adj = [
             vec![1, 2],       // 0
             vec![0, 2, 3],    // 1
             vec![0, 1, 3, 4], // 2
@@ -351,7 +351,7 @@ mod tests {
     }
     #[test]
     fn adjacency_graph_prefer_big_steps() {
-        let adj = vec![
+        let adj = [
             vec![1, 2],       // 0
             vec![0, 2, 3],    // 1
             vec![0, 1, 3, 4], // 2
@@ -387,7 +387,7 @@ mod tests {
     fn adjacency_graph_with_ordered_float_costs() {
         use ordered_float::OrderedFloat;
 
-        let adj = vec![
+        let adj = [
             vec![1, 2],       // 0
             vec![0, 2, 3],    // 1
             vec![0, 1, 3, 4], // 2

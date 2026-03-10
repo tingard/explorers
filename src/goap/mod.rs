@@ -157,10 +157,7 @@ mod tests {
     /// What actions can I take in a given state?
     fn pizza_action_factory(state: &BTreeState) -> Vec<EatingActions> {
         let mut actions: Vec<EatingActions> = vec![];
-        if state
-            .get("has_money")
-            .map_or(false, |v| v == &Value::Bool(true))
-        {
+        if state.get("has_money") == Some(&Value::Bool(true)) {
             actions.push(EatingActions::Buy("pizza".to_string()));
         }
         for (id, v) in state.items_with_prefix("has_ingredients<") {
@@ -185,10 +182,7 @@ mod tests {
                 actions.push(EatingActions::Eat(food.to_string()));
             }
         }
-        if state
-            .get("has_food<pizza>")
-            .map_or(false, |v| v == &Value::Bool(true))
-        {
+        if state.get("has_food<pizza>") == Some(&Value::Bool(true)) {
             actions.push(EatingActions::Eat("pizza".to_string()));
         }
         actions
@@ -203,7 +197,7 @@ mod tests {
             // We need to specify whether a goal state has been reached
             |state, goal| state.matches(goal),
             // We can provide a heuristic function to guide search
-            |state, goal| goal.manhattan_distance(&state) as i32,
+            |state, goal| goal.manhattan_distance(state) as i32,
             // We also need to allow side-effects to mutate the state, this is handled by an event factory
             |_, _| (),
         );
@@ -236,7 +230,7 @@ mod tests {
             // We need to specify whether a goal state has been reached
             |state, goal| state.matches(goal),
             // We can provide a heuristic function to guide search
-            |state, goal| goal.manhattan_distance(&state) as i32,
+            |state, goal| goal.manhattan_distance(state) as i32,
             // We also need to allow side-effects to mutate the state, this is handled by an event factory
             |_, _| (),
         );
@@ -269,7 +263,7 @@ mod tests {
             // We need to specify whether a goal state has been reached
             |state, goal| state.matches(goal),
             // We can provide a heuristic function to guide search
-            |state, goal| goal.manhattan_distance(&state) as i32,
+            |state, goal| goal.manhattan_distance(state) as i32,
             // We also need to allow side-effects to mutate the state, this is handled by an event factory
             |_, _| (),
         );
@@ -367,7 +361,7 @@ mod tests {
                         return None;
                     };
                     *y = y.saturating_sub(time_delta);
-                    return Some(Value::U32(*y));
+                    Some(Value::U32(*y))
                 })
             else {
                 eprintln!("Failed to update obstacle_y");
@@ -397,7 +391,7 @@ mod tests {
             // We need to specify whether a goal state has been reached
             |state, goal| state.matches(goal),
             // We can provide a heuristic function to guide search
-            |state, goal| goal.manhattan_distance(&state) as i32,
+            |state, goal| goal.manhattan_distance(state) as i32,
             // We also need to allow side-effects to mutate the state, this is handled by an event factory
             event_factory,
         );

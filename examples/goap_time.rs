@@ -68,7 +68,7 @@ fn event_factory(state_before_action: &BTreeState, state_after_action: &mut BTre
                 return None;
             };
             *y = y.saturating_sub(time_delta);
-            return Some(Value::U32(*y));
+            Some(Value::U32(*y))
         })
     else {
         eprintln!("Failed to update obstacle_y");
@@ -99,7 +99,7 @@ fn main() {
         // We need to specify whether a goal state has been reached
         |state, goal| state.matches(goal),
         // We can provide a heuristic function to guide search
-        |state, goal| goal.manhattan_distance(&state) as i32,
+        |state, goal| goal.manhattan_distance(state) as i32,
         // We also need to allow side-effects to mutate the state, this is handled by an event factory
         event_factory,
     );

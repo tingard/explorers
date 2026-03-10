@@ -138,7 +138,7 @@ mod tests {
     fn can_try_from_bool_value() {
         let value = Value::Bool(true);
         let value_as_bool: bool = value.try_into().unwrap();
-        assert_eq!(value_as_bool, true);
+        assert!(value_as_bool);
     }
 
     #[test]
@@ -200,18 +200,16 @@ mod tests {
 
     #[test]
     fn can_try_from_f32_value() {
-        let float_value = 3.14_f32;
-        let value = Value::Float32(ordered_float::OrderedFloat(float_value));
+        let value = Value::Float32(ordered_float::OrderedFloat(std::f32::consts::PI));
         let value_as_f32: f32 = value.try_into().unwrap();
-        assert_eq!(value_as_f32, float_value);
+        assert_eq!(value_as_f32, std::f32::consts::PI);
     }
 
     #[test]
     fn can_try_from_f64_value() {
-        let float_value = -2.718281828459045;
-        let value = Value::Float64(ordered_float::OrderedFloat(float_value));
+        let value = Value::Float64(ordered_float::OrderedFloat(std::f64::consts::PI));
         let value_as_f64: f64 = value.try_into().unwrap();
-        assert_eq!(value_as_f64, float_value);
+        assert_eq!(value_as_f64, std::f64::consts::PI);
     }
 
     #[test]

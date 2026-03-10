@@ -11,7 +11,6 @@ fn wait_for_input() {
     let mut answer = String::new();
     std::io::stdin()
         .read_line(&mut answer)
-        .ok()
         .expect("Failed to read line");
 }
 
@@ -94,7 +93,7 @@ impl TicTacToeState {
             .flatten()
             .map(|v| u32::from(v.is_some()))
             .sum();
-        match n_moves_played % 2 == 0 {
+        match n_moves_played.is_multiple_of(2) {
             true => TicTacToePlayer::Noughts,
             false => TicTacToePlayer::Crosses,
         }
@@ -149,14 +148,14 @@ impl std::fmt::Display for TicTacToeState {
             Self::repr_pos(self.tc()),
             Self::repr_pos(self.tr())
         ));
-        board.push_str(&format!("---+---+---\n"));
+        board.push_str("---+---+---\n");
         board.push_str(&format!(
             " {} | {} | {} \n",
             Self::repr_pos(self.cl()),
             Self::repr_pos(self.cc()),
             Self::repr_pos(self.cr())
         ));
-        board.push_str(&format!("---+---+---\n"));
+        board.push_str("---+---+---\n");
         board.push_str(&format!(
             " {} | {} | {} \n",
             Self::repr_pos(self.bl()),
@@ -171,16 +170,16 @@ impl State for TicTacToeState {
     type Key = [u8; 3];
 
     fn key(&self) -> [u8; 3] {
-        let b0 = Self::as_bits(&self.tl()) << 6
-            | Self::as_bits(&self.tc()) << 4
-            | Self::as_bits(&self.tr()) << 2
-            | Self::as_bits(&self.cl());
-        let b1 = Self::as_bits(&self.cc()) << 6
-            | Self::as_bits(&self.cr()) << 4
-            | Self::as_bits(&self.bl()) << 2
-            | Self::as_bits(&self.bc());
-        let b2 = Self::as_bits(&self.br()) << 6;
-        return [b0, b1, b2];
+        let b0 = Self::as_bits(self.tl()) << 6
+            | Self::as_bits(self.tc()) << 4
+            | Self::as_bits(self.tr()) << 2
+            | Self::as_bits(self.cl());
+        let b1 = Self::as_bits(self.cc()) << 6
+            | Self::as_bits(self.cr()) << 4
+            | Self::as_bits(self.bl()) << 2
+            | Self::as_bits(self.bc());
+        let b2 = Self::as_bits(self.br()) << 6;
+        [b0, b1, b2]
     }
 }
 
@@ -231,7 +230,7 @@ impl Action for TicTacToeAction {
 
     fn key(&self) -> [u8; 1] {
         match self.position {
-            TicTacToePosition::TopLeft => [0 << 1 | (self.player as u8)],
+            TicTacToePosition::TopLeft => [(self.player as u8)],
             TicTacToePosition::TopCenter => [1 << 1 | (self.player as u8)],
             TicTacToePosition::TopRight => [2 << 1 | (self.player as u8)],
             TicTacToePosition::CenterLeft => [3 << 1 | (self.player as u8)],
@@ -465,12 +464,12 @@ fn run_mcts() -> anyhow::Result<()> {
                 continue;
             }
             // What actions are available for expansion?
-            let expansion_actions = env.action_space(&leaf_node);
+            let expansion_actions = env.action_space(leaf_node);
             let expansion_action = selection_policy
-                .select_action(&leaf_node, &expansion_actions)
+                .select_action(leaf_node, &expansion_actions)
                 .expect("Can select expansion action");
 
-            let expanded_transition = env.step(&leaf_node, expansion_action).expect("Can step");
+            let expanded_transition = env.step(leaf_node, expansion_action).expect("Can step");
             let expanded_state = &expanded_transition.new_state;
             let rollout_winner = if expanded_transition.transition_type == TransitionType::Running {
                 // Expansion did not result in a terminal state - perform a rollout
@@ -514,7 +513,7 @@ fn run_mcts() -> anyhow::Result<()> {
             chosen_action.position,
             n_rollouts
         );
-        let transition = env.step(&state, &chosen_action).expect("Can step");
+        let transition = env.step(&state, chosen_action).expect("Can step");
         state = transition.new_state;
         let TransitionType::Running = &transition.transition_type else {
             break;

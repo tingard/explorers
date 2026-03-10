@@ -38,10 +38,7 @@ impl Action<BTreeState> for EatingActions {
 fn pizza_action_factory(state: &BTreeState) -> Vec<EatingActions> {
     let mut actions: Vec<EatingActions> = vec![];
     // I can only buy pizza if I have money.
-    if state
-        .get("has_money")
-        .map_or(false, |v| v == &Value::Bool(true))
-    {
+    if state.get("has_money") == Some(&Value::Bool(true)) {
         actions.push(EatingActions::Buy("pizza".to_string()));
     }
     // If I have ingredients, I can cook food.
@@ -79,7 +76,7 @@ fn main() {
         // We need to specify whether a goal state has been reached
         |state, goal| state.matches(goal),
         // We can provide a heuristic function to guide search
-        |state, goal| goal.manhattan_distance(&state) as i32,
+        |state, goal| goal.manhattan_distance(state) as i32,
         // We also need to allow side-effects to mutate the state, this is handled by an event factory
         |_, _| (),
     );
