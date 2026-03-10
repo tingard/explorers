@@ -41,8 +41,15 @@ assert!(result.is_ok_and(|r| r.path[r.path.len() - 1].1 == goal));
 
 ## Goal-Oriented Action Planning
 
-We can leverage the above a-star implementation as the backbone for action planning. Note that our implementation is highly flexible, and therefore it is up to you to adopt good practises. We suggest reading the [Nyx](https://icaps24.icaps-conference.org/program/workshops/keps-papers/KEPS-24_paper_18.pdf) planner paper alongside other documentation (such as [pyperplan](https://github.com/aibasel/pyperplan/blob/main/doc/documentation.md)).
+We can leverage the above a-star implementation as the backbone for action planning. This is implemented in the `explorers::goap` module.
+
+Note that the implementation is highly flexible (read, it's just a skin on A-star), and therefore it is up to you to adopt good practises. We suggest reading the [Nyx](https://icaps24.icaps-conference.org/program/workshops/keps-papers/KEPS-24_paper_18.pdf) planner paper alongside other documentation (such as [pyperplan](https://github.com/aibasel/pyperplan/blob/main/doc/documentation.md)).
 
 To view an example of action planning using this library, see the [simple_goap](examples/goap_simple.rs) example.
 
 To view an example of incorporating time in action planning, see the [goap_](examples/goap_time.rs) example.
+
+
+## Monte-Carlo Tree Search
+
+We've also provided a very basic implementation of Monte-Carlo Tree Search (MCTS) in the `explorers::mcts` module. An example of using MCTS to play Tic-Tac-Toe can be found in the [mcts_tic_tac_toe](examples/mcts_tic_tac_toe.rs) example.
