@@ -39,7 +39,9 @@ let result = astar()
 assert!(result.is_ok_and(|r| r.path[r.path.len() - 1].1 == goal));
 ```
 
-## Goal-Oriented Action Planning
+## Planning
+
+### Goal-Oriented Action Planning
 
 We can leverage the above a-star implementation as the backbone for action planning. This is implemented in the `explorers::goap` module.
 
@@ -50,6 +52,11 @@ To view an example of action planning using this library, see the [simple_goap](
 To view an example of incorporating time in action planning, see the [goap_time](examples/goap_time.rs) example.
 
 
-## Monte-Carlo Tree Search
+### Monte-Carlo Tree Search
 
 We've also provided a very basic implementation of Monte-Carlo Tree Search (MCTS) in the `explorers::mcts` module. An example of using MCTS to play Tic-Tac-Toe can be found in the [mcts_tic_tac_toe](examples/mcts_tic_tac_toe.rs) example.
+
+
+## Pathfinding
+
+Beyond the A-star implementation, we also provide simple implementations of RRT and RRT-star, and adopt the excellent `h3o` crate as a navmesh to enable geospatial pathfinding using A-star and a string pulling algorithm.
