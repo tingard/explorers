@@ -47,7 +47,7 @@ Note that the implementation is highly flexible (read, it's just a skin on A-sta
 
 To view an example of action planning using this library, see the [simple_goap](examples/goap_simple.rs) example.
 
-To view an example of incorporating time in action planning, see the [goap_](examples/goap_time.rs) example.
+To view an example of incorporating time in action planning, see the [goap_time](examples/goap_time.rs) example.
 
 
 ## Monte-Carlo Tree Search
