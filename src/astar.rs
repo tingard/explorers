@@ -12,7 +12,7 @@ use std::{
 };
 use tracing::debug;
 
-const MAX_SEARCH_DEPTH_DEFAULT: usize = 1_000_000;
+const MAX_NODES_SEARCHED_DEFAULT: usize = 1_000_000;
 
 pub struct AstarResult<E, N, C: Num> {
     pub path: Vec<(Option<E>, N)>,
@@ -111,7 +111,7 @@ pub fn astar<'a, N, E, C, G>(
     is_goal: impl Fn(&N, &G) -> bool,
     get_neighbors: impl Fn(&N) -> Vec<EdgeToNodeWithCost<E, N, C>>,
     heuristic: impl Fn(&N, &G) -> C,
-    max_search_depth: Option<usize>,
+    max_nodes_searched: Option<usize>,
     max_search_time: Option<Duration>,
 ) -> anyhow::Result<AstarResult<E, N, C>>
 where
@@ -119,7 +119,7 @@ where
     E: Clone + Debug,
     C: Num + Ord + Neg<Output = C> + Clone + Debug,
 {
-    let max_search_depth = max_search_depth.unwrap_or(MAX_SEARCH_DEPTH_DEFAULT);
+    let max_nodes_search = max_nodes_searched.unwrap_or(MAX_NODES_SEARCHED_DEFAULT);
     // Queue of the most promising nodes to explore next
     let mut frontier = PriorityQueue::<N, C>::new();
     frontier.push(start.clone(), C::zero());
@@ -134,7 +134,7 @@ where
     let search_start = &max_search_time.map(|_| Instant::now());
     let max_search_time = max_search_time.unwrap_or(Duration::MAX);
 
-    for n_nodes_searched in 0..max_search_depth {
+    for n_nodes_searched in 0..max_nodes_search {
         if search_start.is_some_and(|start| start.elapsed() > max_search_time) {
             return Err(anyhow!("Search timed out"));
         }
@@ -192,7 +192,7 @@ where
     // Exited early
     return Err(anyhow::anyhow!(
         "No path found within {} steps - reached {} nodes",
-        max_search_depth,
+        max_nodes_search,
         cost_so_far.len()
     ));
 }
@@ -219,7 +219,7 @@ mod tests {
             })
             // Distance heuristic
             .heuristic(|i: &i32, g: &i32| (g - i).abs())
-            .max_search_depth(1_000_000)
+            .max_nodes_searched(1_000_000)
             .plan_path(&0i32, &goal);
         // Check we found a path
         assert!(result.is_ok_and(|r| r.path[r.path.len() - 1].1 == goal));
@@ -267,7 +267,7 @@ mod tests {
             .is_goal(|n, g| n == g)
             // Distance heuristic
             .heuristic(|i, g| (g - i).abs())
-            .max_search_depth(1)
+            .max_nodes_searched(1)
             .plan_path(&0i32, &goal);
         // Check we could not find a path
         println!("{:?}", result);
@@ -288,7 +288,7 @@ mod tests {
             .is_goal(|n, g| n == g)
             // Distance heuristic
             .heuristic(|i, g| (g - i).abs())
-            .max_search_depth(100)
+            .max_nodes_searched(100)
             .plan_path(&0i32, &goal);
         // Check we could not find a path
         assert!(result.is_err_and(|e| e.to_string().starts_with("No path found")));
@@ -308,7 +308,7 @@ mod tests {
             // Distance heuristic
             .is_goal(|n, g| n == g)
             .heuristic(|i, g| (g - i).abs())
-            .max_search_depth(1_000_000)
+            .max_nodes_searched(1_000_000)
             .max_search_time(Duration::from_nanos(1))
             .plan_path(&0i32, &goal);
         // Check we could not find a path

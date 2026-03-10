@@ -80,7 +80,7 @@ where
         &self,
         current_state: &S,
         goal_state: &G,
-        max_search_depth: Option<usize>,
+        max_nodes_searched: Option<usize>,
     ) -> anyhow::Result<GoapPlan<S, A, C>> {
         let result = astar::astar()
             .get_neighbors(|state: &S| {
@@ -105,7 +105,7 @@ where
                     })
                     .collect()
             })
-            .maybe_max_search_depth(max_search_depth)
+            .maybe_max_nodes_searched(max_nodes_searched)
             .is_goal(&self.goal_comparator)
             .heuristic(&self.heuristic)
             .plan_path(current_state, goal_state)?;

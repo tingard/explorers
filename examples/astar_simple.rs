@@ -23,7 +23,7 @@ fn main() {
         })
         // Distance heuristic
         .heuristic(|i: &i32, g: &i32| (g - i).abs())
-        .max_search_depth(1_000_000)
+        .max_nodes_searched(1_000_000)
         .plan_path(&0i32, &goal);
 
     println!("Path is {:?}", result.expect("Found a path").path);

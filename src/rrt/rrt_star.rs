@@ -293,8 +293,8 @@ mod tests {
         );
         let mut path = None;
         let mut best_cost = f32::INFINITY;
-        for _ in 0..10000 {
-            path = search.sample(10).expect("Can search");
+        for _ in 0..100 {
+            path = search.sample(100).expect("Can search");
             if let Some(path) = &path {
                 let cost = path
                     .iter()
@@ -303,8 +303,6 @@ mod tests {
                     .sum();
                 if cost < best_cost {
                     best_cost = cost;
-                    let path_vec: Vec<_> = path.iter().map(|index| search[*index]).collect();
-                    println!("{path_vec:?}");
                 }
             }
         }
@@ -312,17 +310,15 @@ mod tests {
             println!("Path not found");
             return;
         };
-        // for index in path.iter() {
-        //     let node = search[*index];
-        //     println!("{:?}", node);
-        // }
 
         println!(
             "Path with n={} found after {} nodes searched",
             path.len(),
             search.len()
         );
-        let optimal_path_steps = cost_function(&from, &to).unwrap() / step_size;
-        println!("Optimal path would have n={}", optimal_path_steps);
+        for index in path.iter() {
+            let node = search[*index];
+            println!("{index}: {:?}", node);
+        }
     }
 }
