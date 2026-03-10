@@ -1,0 +1,29 @@
+name: Run Linting and Tests
+
+on: push
+
+# Make sure CI fails on all warnings, including Clippy lints
+env:
+    RUSTFLAGS: "-Dwarnings"
+
+jobs:
+    clippy:
+        name: Check formatting 🐝
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+            - name: Run Clippy
+              run: cargo clippy --all-targets --all-features
+
+    test:
+        name: Run testing ✅⚠️
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+            - name: Run Cargo Test
+              run: cargo test --all-targets --all-features
