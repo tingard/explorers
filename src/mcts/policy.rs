@@ -43,7 +43,7 @@ where
     // Policy where actions are uniformly weighted
     pub fn uniform() -> Self {
         StochasticPolicy {
-            action_weights_fn: Box::new(|_, a| Ok(a.into_iter().map(|_| 1.0).collect())),
+            action_weights_fn: Box::new(|_, a| Ok(a.iter().map(|_| 1.0).collect())),
         }
     }
 }

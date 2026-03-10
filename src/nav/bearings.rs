@@ -8,9 +8,9 @@ pub fn signed_interior_angle(bearing_a: f64, bearing_b: f64) -> f64 {
         difference = 360.0 - difference;
     }
     if (bearing_a + difference).rem_euclid(360.0) == bearing_b {
-        return difference;
+        difference
     } else {
-        return -difference;
+        -difference
     }
 }
 

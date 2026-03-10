@@ -105,7 +105,7 @@ where
 /// - `E`: Edge type - use () for no edges.
 /// - `C`: Cost type - required to be negatable (not unsigned), sortable (i32, OrderedFloat<f32>) and clonable number.
 #[builder(derive(Clone), finish_fn = plan_path)]
-pub fn astar<'a, N, E, C, G>(
+pub fn astar<N, E, C, G>(
     #[builder(finish_fn)] start: &N,
     #[builder(finish_fn)] goal: &G,
     is_goal: impl Fn(&N, &G) -> bool,
@@ -190,11 +190,11 @@ where
         }
     }
     // Exited early
-    return Err(anyhow::anyhow!(
+    Err(anyhow::anyhow!(
         "No path found within {} steps - reached {} nodes",
         max_nodes_search,
         cost_so_far.len()
-    ));
+    ))
 }
 
 #[cfg(test)]

@@ -4,7 +4,7 @@ use std::{
     ops::Index,
 };
 
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SortableCost(f32);
 
 impl SortableCost {
@@ -17,6 +17,12 @@ impl SortableCost {
 }
 
 impl Eq for SortableCost {}
+
+impl PartialOrd for SortableCost {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
 
 impl Ord for SortableCost {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
@@ -72,6 +78,10 @@ impl<N> RRTStar<N> {
 
     pub fn len(&self) -> usize {
         self.nodes.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.nodes.is_empty()
     }
 
     pub fn sample(&mut self, n: usize) -> anyhow::Result<Option<Vec<usize>>> {
@@ -203,7 +213,7 @@ impl<N> RRTStar<N> {
                 continue;
             }
             let candidate_cost = candidate_node.cumulative_cost
-                + self.cost_function(&new_node, &candidate_node.node)?;
+                + self.cost_function(new_node, &candidate_node.node)?;
             if candidate_cost < best_parent_cost {
                 best_parent_cost = candidate_cost;
                 best_parent_index = Some(*neighbor_node_index);

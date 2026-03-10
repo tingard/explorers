@@ -25,13 +25,12 @@ impl BTreeState {
         self.0
             .range(prefix.to_string()..)
             .take_while(move |(k, _)| k.starts_with(prefix))
-            .map(|(k, v)| (k, v))
     }
 
     /// Return whether all of the values in the target state match the values in this state.
     pub fn matches(&self, target_state: &BTreeState) -> bool {
         for (k, v_other) in target_state.items() {
-            if self.get(&k).map_or(true, |v_self| v_self != v_other) {
+            if self.get(&k) != Some(v_other) {
                 return false;
             };
         }

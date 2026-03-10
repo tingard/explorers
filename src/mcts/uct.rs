@@ -62,8 +62,7 @@ where
             .map(|a| {
                 // TODO: Return an error if we cannot take the action
                 let transition = self.env.step(state, a).expect("Can take action");
-                let score = self
-                    .mcts_history
+                self.mcts_history
                     .get_node(&transition.new_state.key())
                     // If the node is not present, it should have a maximal value
                     .map_or(f32::MAX, |node| {
@@ -73,8 +72,7 @@ where
                             parent_node.playouts,
                             2.0f32.sqrt(),
                         )
-                    });
-                score
+                    })
             })
             .enumerate()
             .max_by(|(_, v1), (_, v2)| v1.partial_cmp(v2).unwrap())

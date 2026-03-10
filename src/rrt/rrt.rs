@@ -45,6 +45,10 @@ impl<N> RRT<N> {
         self.nodes.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.nodes.is_empty()
+    }
+
     pub fn sample(&mut self, n: usize) -> anyhow::Result<Option<Vec<usize>>> {
         // Expand the nodes vector to accommodate at least n new items, avoids growing the vector multiple
         // times during the search.

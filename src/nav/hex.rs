@@ -30,7 +30,7 @@ pub fn portal_between(
         .map(|v| {
             let bounds = v.boundary();
             let mut coord_gen = bounds
-                .into_iter()
+                .iter()
                 .map(|c| geo::coord! { x: c.lng(), y: c.lat() });
             let right = coord_gen.next().expect("Has left coord");
             let left = coord_gen.next().expect("Has right coord");

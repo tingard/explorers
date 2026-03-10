@@ -82,7 +82,7 @@ fn step_string_pull<C, B>(
         this.cursor = other.funnel + 1;
         this.funnel = other.funnel + 1;
         other.cursor = other.funnel + 1;
-        other.funnel = other.funnel + 1;
+        other.funnel += 1;
     } else {
         this.funnel = this.cursor;
     }
@@ -94,7 +94,7 @@ pub fn string_pull_cartesian(
     end: (f64, f64),
 ) -> anyhow::Result<Vec<(f64, f64)>> {
     portals.push((end, end));
-    let (mut left_state, mut right_state) = StringPullState::from_portals(&portals).into();
+    let (mut left_state, mut right_state) = StringPullState::from_portals(&portals);
     let mut path = vec![start];
     let mut edge_to_move = LeftRight::default();
 
@@ -126,7 +126,7 @@ pub fn string_pull_geo(
     end: geo::Coord,
 ) -> anyhow::Result<Vec<geo::Coord>> {
     portals.push((end, end));
-    let (mut left_state, mut right_state) = StringPullState::from_portals(&portals).into();
+    let (mut left_state, mut right_state) = StringPullState::from_portals(&portals);
     let mut path = vec![start];
     let mut edge_to_move = LeftRight::default();
 

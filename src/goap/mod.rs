@@ -48,7 +48,7 @@ where
     action_factory: Box<dyn Fn(&S) -> Vec<A>>,
     goal_comparator: Box<dyn Fn(&S, &G) -> bool>,
     heuristic: Box<dyn Fn(&S, &G) -> C>,
-    event_factory: Box<dyn Fn(&S, &mut S) -> ()>,
+    event_factory: Box<dyn Fn(&S, &mut S)>,
 }
 
 #[bon]
@@ -65,7 +65,7 @@ where
         action_factory: impl Fn(&S) -> Vec<A> + 'static,
         is_goal: impl Fn(&S, &G) -> bool + 'static,
         heuristic: impl Fn(&S, &G) -> C + 'static,
-        event_factory: impl Fn(&S, &mut S) -> () + 'static,
+        event_factory: impl Fn(&S, &mut S) + 'static,
     ) -> Self {
         Self {
             action_factory: Box::new(action_factory),
@@ -99,7 +99,7 @@ where
                         // For example, a "Wait" action would update some time information in the state, which
                         // we could use to simulate motion of objects via effects.
                         debug!("Running events on resulting state {:?}", state);
-                        (self.event_factory)(&state, &mut new_state);
+                        (self.event_factory)(state, &mut new_state);
                         debug!("Action {:?} resulted in state {:?}", action, new_state);
                         EdgeToNodeWithCost::new(action, new_state, action_cost)
                     })
