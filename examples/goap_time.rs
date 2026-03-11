@@ -48,6 +48,8 @@ fn action_factory(_: &BTreeState) -> Vec<KeyboardAction> {
 
 /// The event factory updates the state after an action is applied. In this case, we check if time has progressed
 /// and move the obstacle down accordingly.
+/// It would be entirely possible to implement this logic in the action itself, and would possibly be more practical
+/// in this case. However, we separate it here to illustrate how an event factory can be used.
 fn event_factory(state_before_action: &BTreeState, state_after_action: &mut BTreeState) {
     let Some(Value::U32(time_before)) = state_before_action.get("timer") else {
         eprintln!("No timer found");
@@ -62,21 +64,14 @@ fn event_factory(state_before_action: &BTreeState, state_after_action: &mut BTre
         return;
     }
     // Move obstacle down
-    let Some(Value::U32(resulting_obstacle_y)) =
-        state_after_action.update("obstacle_y", |obstacle_y| {
-            let Value::U32(y) = obstacle_y else {
-                return None;
-            };
-            *y = y.saturating_sub(time_delta);
-            Some(Value::U32(*y))
-        })
-    else {
-        eprintln!("Failed to update obstacle_y");
-        return;
-    };
-    if resulting_obstacle_y > 0 {
-        return;
-    }
+    state_after_action.update("obstacle_y", |obstacle_y| {
+        let Value::U32(y) = obstacle_y else {
+            return None;
+        };
+        *y = y.saturating_sub(time_delta);
+        Some(Value::U32(*y))
+    });
+
     let Some(Value::I32(obstacle_x)) = state_after_action.get("obstacle_x") else {
         eprintln!("Failed to get obstacle_x");
         return;

@@ -1,21 +1,26 @@
 use super::node::RRTNode;
 use std::ops::Index;
 
+type PathIsCompleteFunction<N> = dyn Fn(&N) -> anyhow::Result<bool>;
+type NodeIsValidFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<bool>;
+type CostFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<f32>;
+type SamplingFunction<N> = dyn Fn(&[RRTNode<N>]) -> anyhow::Result<N>;
+type StepFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<N> + 'static;
 pub struct RRT<N> {
     // Collection of nodes used in the search
     nodes: Vec<RRTNode<N>>,
     // Function to determine if the search is complete
-    is_complete: Box<dyn Fn(&N) -> anyhow::Result<bool>>,
+    is_complete: Box<PathIsCompleteFunction<N>>,
     // Function to determine if the first node is allowed to be extended
     // to the second (is this a valid new node? Are we allowed to make this
     // connection?)
-    is_valid: Box<dyn Fn(&N, &N) -> anyhow::Result<bool>>,
+    is_valid: Box<NodeIsValidFunction<N>>,
     // Distance function between two nodes
-    cost_function: Box<dyn Fn(&N, &N) -> anyhow::Result<f32>>,
+    cost_function: Box<CostFunction<N>>,
     // How to generate a node, given "from"
-    sampling_function: Box<dyn Fn(&[RRTNode<N>]) -> anyhow::Result<N>>,
+    sampling_function: Box<SamplingFunction<N>>,
     // How to step from one node towards another?
-    step_function: Box<dyn Fn(&N, &N) -> anyhow::Result<N>>,
+    step_function: Box<StepFunction<N>>,
 }
 
 impl<N> RRT<N> {

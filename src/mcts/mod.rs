@@ -39,6 +39,11 @@ pub struct MCTSStore<E: Environment> {
     pub store: HashMap<<<E as Environment>::State as State>::Key, MCTSNode<E>>,
 }
 
+type StateActionPairings<E> = (
+    Vec<<E as Environment>::State>,
+    Vec<<E as Environment>::Action>,
+);
+
 impl<E> MCTSStore<E>
 where
     E: Environment,
@@ -61,10 +66,7 @@ where
         env: &E,
         root: &<E as Environment>::State,
         selection_policy: &dyn ActionPolicy<E>,
-    ) -> anyhow::Result<(
-        Vec<<E as Environment>::State>,
-        Vec<<E as Environment>::Action>,
-    )> {
+    ) -> anyhow::Result<StateActionPairings<E>> {
         let mut action_chain = vec![];
         let mut state_chain = vec![root.clone()];
 

@@ -13,14 +13,14 @@ pub trait ActionPolicy<E: Environment> {
     ) -> Result<&'a <E as Environment>::Action, anyhow::Error>;
 }
 
+type ActionWeightsFunction<E> = dyn Fn(
+    &<E as Environment>::State,
+    &[<E as Environment>::Action],
+) -> Result<Vec<f32>, anyhow::Error>;
+
 /// Policy which will randomly sample from a distribution over allowed actions weighted by a state.
 pub struct StochasticPolicy<E: Environment> {
-    action_weights_fn: Box<
-        dyn Fn(
-            &<E as Environment>::State,
-            &[<E as Environment>::Action],
-        ) -> Result<Vec<f32>, anyhow::Error>,
-    >,
+    action_weights_fn: Box<ActionWeightsFunction<E>>,
 }
 
 impl<E> StochasticPolicy<E>

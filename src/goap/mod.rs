@@ -39,16 +39,21 @@ where
     }
 }
 
+type ActionFactoryFunction<S, A> = dyn Fn(&S) -> Vec<A>;
+type GoalComparatorFunction<S, G> = dyn Fn(&S, &G) -> bool;
+type HeuristicFunction<S, G, C> = dyn Fn(&S, &G) -> C;
+type EventFactoryFunction<S> = dyn Fn(&S, &mut S);
+
 /// GOAP planner which uses A* search to find a path to a goal state.
 pub struct Planner<S, A, G, C>
 where
     S: State,
     A: Action<S> + Clone,
 {
-    action_factory: Box<dyn Fn(&S) -> Vec<A>>,
-    goal_comparator: Box<dyn Fn(&S, &G) -> bool>,
-    heuristic: Box<dyn Fn(&S, &G) -> C>,
-    event_factory: Box<dyn Fn(&S, &mut S)>,
+    action_factory: Box<ActionFactoryFunction<S, A>>,
+    goal_comparator: Box<GoalComparatorFunction<S, G>>,
+    heuristic: Box<HeuristicFunction<S, G, C>>,
+    event_factory: Box<EventFactoryFunction<S>>,
 }
 
 #[bon]
