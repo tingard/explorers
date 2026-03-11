@@ -79,7 +79,7 @@ where
 /// # Examples
 ///
 /// ```
-/// # use wadoo_rs::astar::{astar, EdgeToNodeWithCost};
+/// # use explorers::astar::{astar, EdgeToNodeWithCost};
 /// let goal = 10i32;
 /// let result = astar()
 ///     // How do we determine if we are done?

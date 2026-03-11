@@ -59,4 +59,4 @@ We've also provided a very basic implementation of Monte-Carlo Tree Search (MCTS
 
 ## Pathfinding
 
-Beyond the A-star implementation, we also provide simple implementations of RRT and RRT-star, and adopt the excellent `h3o` crate as a navmesh to enable geospatial pathfinding using A-star and a string pulling algorithm.
+Beyond the A-star implementation, we also provide simple implementations of RRT and RRT-star inside the `explorers::pathing` module, and adopt the excellent `h3o` crate as a navmesh to enable geospatial pathfinding using A-star and a string pulling algorithm.

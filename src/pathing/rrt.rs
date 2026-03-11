@@ -1,5 +1,10 @@
-use super::node::RRTNode;
 use std::ops::Index;
+
+pub struct RRTNode<N> {
+    pub node: N,
+    pub cumulative_cost: f32,
+    pub parent: Option<usize>,
+}
 
 type PathIsCompleteFunction<N> = dyn Fn(&N) -> anyhow::Result<bool>;
 type NodeIsValidFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<bool>;

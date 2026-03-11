@@ -1,8 +1,14 @@
-use super::node::RRTNode;
 use std::{
     collections::{BTreeSet, HashSet},
     ops::Index,
 };
+
+// Functionally identical to RRTNode, but separated for cleanliness of implementation.
+pub struct RRTStarNode<N> {
+    pub node: N,
+    pub cumulative_cost: f32,
+    pub parent: Option<usize>,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SortableCost(f32);
@@ -37,11 +43,11 @@ impl Ord for SortableCost {
 type PathIsCompleteFunction<N> = dyn Fn(&N) -> anyhow::Result<bool>;
 type NodeIsValidFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<bool>;
 type CostFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<f32>;
-type SamplingFunction<N> = dyn Fn(&[RRTNode<N>]) -> anyhow::Result<N>;
+type SamplingFunction<N> = dyn Fn(&[RRTStarNode<N>]) -> anyhow::Result<N>;
 type StepFunction<N> = dyn Fn(&N, &N) -> anyhow::Result<N> + 'static;
 pub struct RRTStar<N> {
     // Collection of nodes used in the search
-    nodes: Vec<RRTNode<N>>,
+    nodes: Vec<RRTStarNode<N>>,
     end_nodes: HashSet<usize>,
     // Function to determine if the search is complete
     is_complete: Box<PathIsCompleteFunction<N>>,
@@ -63,11 +69,11 @@ impl<N> RRTStar<N> {
         is_complete: impl Fn(&N) -> anyhow::Result<bool> + 'static,
         is_valid: impl Fn(&N, &N) -> anyhow::Result<bool> + 'static,
         cost_function: impl Fn(&N, &N) -> anyhow::Result<f32> + 'static,
-        sampling_function: impl Fn(&[RRTNode<N>]) -> anyhow::Result<N> + 'static,
+        sampling_function: impl Fn(&[RRTStarNode<N>]) -> anyhow::Result<N> + 'static,
         step_function: impl Fn(&N, &N) -> anyhow::Result<N> + 'static,
     ) -> Self {
         Self {
-            nodes: vec![RRTNode {
+            nodes: vec![RRTStarNode {
                 node: from,
                 cumulative_cost: 0.0,
                 parent: None,
@@ -135,7 +141,7 @@ impl<N> RRTStar<N> {
             }
 
             let path_has_been_found = (self.is_complete)(&new_node)?;
-            self.nodes.push(RRTNode {
+            self.nodes.push(RRTStarNode {
                 node: new_node,
                 cumulative_cost,
                 parent: Some(best_parent_index),
@@ -251,7 +257,7 @@ mod tests {
     use rand::prelude::*;
     use rand_distr::Uniform;
 
-    use super::{RRTNode, RRTStar};
+    use super::{RRTStar, RRTStarNode};
 
     #[test]
     fn simple_2d() {
@@ -281,7 +287,7 @@ mod tests {
                 dx.powi(2) + dy.powi(2) > r * r
             }))
         };
-        let sampling_funtion = |nodes: &[RRTNode<Node>]| {
+        let sampling_funtion = |nodes: &[RRTStarNode<Node>]| {
             let p0 = &nodes[0].node;
             let mut rng = rand::rng();
             let x_distr = Uniform::new(-20.0, 20.0).expect("Can create x distr");
