@@ -39,6 +39,16 @@ let result = astar()
 assert!(result.is_ok_and(|r| r.path[r.path.len() - 1].1 == goal));
 ```
 
+### Benchmarking
+
+I've not set up a robust benchmarking process - instead using a combination of the `hyperfine` CLI and examples. For example:
+
+```bash
+hyperfine 'cargo run --release --example astar_benchmark'
+```
+
+Ensuring that you have already built the package with the release flag. Improvements will eventually come, if needed!
+
 ## Planning
 
 ### Goal-Oriented Action Planning

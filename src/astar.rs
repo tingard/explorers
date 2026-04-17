@@ -3,7 +3,6 @@ use num_traits::Num;
 
 use bon::builder;
 use hashbrown::HashMap;
-use priority_queue::PriorityQueue;
 use std::{
     fmt::Debug,
     hash::Hash,
@@ -11,6 +10,8 @@ use std::{
     time::{Duration, Instant},
 };
 use tracing::debug;
+
+use crate::priority_queue::PriorityQueue;
 
 const MAX_NODES_SEARCHED_DEFAULT: usize = 1_000_000;
 
@@ -121,15 +122,15 @@ where
 {
     let max_nodes_search = max_nodes_searched.unwrap_or(MAX_NODES_SEARCHED_DEFAULT);
     // Queue of the most promising nodes to explore next
-    let mut frontier = PriorityQueue::<N, C>::new();
+    let mut frontier = PriorityQueue::<C, N>::new();
     frontier.push(start.clone(), C::zero());
 
     // Mapping from end node to an option node + edge combo
     let mut came_from: HashMap<N, Option<(N, E)>> = HashMap::new();
     came_from.insert(start.clone(), None);
     // Mapping to the cumulative cost of reaching a node
-    let mut cost_so_far: HashMap<N, C> = HashMap::new();
-    cost_so_far.insert(start.clone(), C::zero());
+    let mut cost_so_far: HashMap<N, (C, Option<(N, E)>)> = HashMap::new();
+    cost_so_far.insert(start.clone(), (C::zero(), None));
 
     let search_start = &max_search_time.map(|_| Instant::now());
     let max_search_time = max_search_time.unwrap_or(Duration::MAX);
@@ -139,19 +140,24 @@ where
             return Err(anyhow!("Search timed out"));
         }
         let Some((current, priority)) = frontier.pop() else {
+            debug!("Nothing left to search.");
             // TODO: Move to thiserror and setup custom error type
             return Err(anyhow!("No path found"));
         };
 
         debug!("Checking {current:?} (had priority {priority:?})");
-        let cost = cost_so_far.get(&current).expect("Current has cost").clone();
+        let cost = cost_so_far
+            .get(&current)
+            .expect("Current has cost")
+            .0
+            .clone();
         if is_goal(&current, goal) {
             debug!("Reached goal");
             let mut cursor = current.clone();
             let mut path = vec![current.clone()];
             let mut edges = vec![];
             loop {
-                let Some(Some(prev)) = came_from.get(&cursor) else {
+                let Some((_, Some(prev))) = cost_so_far.get(&cursor) else {
                     break;
                 };
                 debug!("{prev:?} -> {cursor:?}");
@@ -164,29 +170,34 @@ where
             edges.reverse();
             return Ok(AstarResult {
                 path: edges.into_iter().zip(path.into_iter()).collect(),
-                cost: cost.clone(),
+                cost,
                 n_nodes_searched,
             });
         }
         for neighbor in get_neighbors(&current) {
-            debug!("\t{current:?} has neighbor {neighbor:?}");
+            debug!("\t{current:?} has edge {neighbor:?}");
             let new_cost = cost.clone() + neighbor.cost;
-            if cost_so_far
-                .get(&neighbor.resulting_node)
-                .is_none_or(|v| &new_cost < v)
-            {
-                let priority = -(new_cost.clone() + heuristic(&neighbor.resulting_node, goal));
-                debug!(
-                    "\t\tAdding {current:?}->{:?} with priority {priority:?}",
-                    neighbor.resulting_node
-                );
-                cost_so_far.insert(neighbor.resulting_node.clone(), new_cost);
-                frontier.push(neighbor.resulting_node.clone(), priority);
-                came_from.insert(
-                    neighbor.resulting_node,
-                    Some((current.clone(), neighbor.edge.clone())),
-                );
-            }
+            // TODO: Is it better to use
+            cost_so_far
+                .entry(neighbor.resulting_node.clone())
+                .and_replace_entry_with(|_, v| {
+                    if new_cost >= v.0 {
+                        debug!("Cost is not better.");
+                        Some(v)
+                    } else {
+                        None
+                    }
+                })
+                .or_insert_with(|| {
+                    // Priority is negative cost
+                    let priority = -(new_cost.clone() + heuristic(&neighbor.resulting_node, goal));
+                    debug!(
+                        "Adding {current:?}->{:?} with priority {priority:?}",
+                        neighbor.resulting_node
+                    );
+                    frontier.push(neighbor.resulting_node.clone(), priority);
+                    (new_cost, Some((current.clone(), neighbor.edge.clone())))
+                });
         }
     }
     // Exited early
