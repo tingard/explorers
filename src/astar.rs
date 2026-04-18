@@ -13,7 +13,7 @@ use tracing::debug;
 
 use crate::priority_queue::PriorityQueue;
 
-const MAX_NODES_SEARCHED_DEFAULT: usize = 1_000_000;
+const MAX_NODES_SEARCHED_DEFAULT: usize = usize::MAX;
 
 pub struct AstarResult<E, N, C: Num> {
     pub path: Vec<(Option<E>, N)>,
@@ -123,11 +123,9 @@ where
     let max_nodes_search = max_nodes_searched.unwrap_or(MAX_NODES_SEARCHED_DEFAULT);
     // Queue of the most promising nodes to explore next
     let mut frontier = PriorityQueue::<C, N>::new();
-    frontier.push(start.clone(), C::zero());
+    let initial_priority = -heuristic(&start, goal);
+    frontier.push(start.clone(), initial_priority);
 
-    // Mapping from end node to an option node + edge combo
-    let mut came_from: HashMap<N, Option<(N, E)>> = HashMap::new();
-    came_from.insert(start.clone(), None);
     // Mapping to the cumulative cost of reaching a node
     let mut cost_so_far: HashMap<N, (C, Option<(N, E)>)> = HashMap::new();
     cost_so_far.insert(start.clone(), (C::zero(), None));
@@ -136,7 +134,9 @@ where
     let max_search_time = max_search_time.unwrap_or(Duration::MAX);
 
     for n_nodes_searched in 0..max_nodes_search {
-        if search_start.is_some_and(|start| start.elapsed() > max_search_time) {
+        if n_nodes_searched.rem_euclid(1000) == 0
+            && search_start.is_some_and(|start| start.elapsed() > max_search_time)
+        {
             return Err(anyhow!("Search timed out"));
         }
         let Some((current, priority)) = frontier.pop() else {
@@ -151,6 +151,15 @@ where
             .expect("Current has cost")
             .0
             .clone();
+        let expected_priority = -(cost.clone() + heuristic(&current, goal));
+        if priority != expected_priority {
+            debug!(
+                "Frontier priority is {:?} - stored cost is {:?}",
+                priority, expected_priority
+            );
+            debug!("Node has been updated in the cost map - moving on");
+            continue;
+        }
         if is_goal(&current, goal) {
             debug!("Reached goal");
             let mut cursor = current.clone();
@@ -195,7 +204,7 @@ where
                         "Adding {current:?}->{:?} with priority {priority:?}",
                         neighbor.resulting_node
                     );
-                    frontier.push(neighbor.resulting_node.clone(), priority);
+                    frontier.push(neighbor.resulting_node, priority);
                     (new_cost, Some((current.clone(), neighbor.edge.clone())))
                 });
         }
