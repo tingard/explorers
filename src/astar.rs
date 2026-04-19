@@ -123,7 +123,7 @@ where
     let max_nodes_search = max_nodes_searched.unwrap_or(MAX_NODES_SEARCHED_DEFAULT);
     // Queue of the most promising nodes to explore next
     let mut frontier = PriorityQueue::<C, N>::new();
-    let initial_priority = -heuristic(&start, goal);
+    let initial_priority = -heuristic(start, goal);
     frontier.push(start.clone(), initial_priority);
 
     // Mapping to the cumulative cost of reaching a node
