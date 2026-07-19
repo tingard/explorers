@@ -1,4 +1,5 @@
 pub mod astar;
+pub mod bt;
 pub mod err;
 pub mod goap;
 pub mod mcts;
