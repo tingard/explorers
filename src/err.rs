@@ -1,12 +1,6 @@
 use std::time::Duration;
 use thiserror::Error;
 
-#[derive(Clone, Debug, Error)]
-pub enum WadooErr {
-    #[error("At least one child is required.")]
-    EmptyChildren,
-}
-
 /// Errors returned by [`crate::astar::astar`].
 #[derive(Clone, Debug, Error, PartialEq, Eq)]
 pub enum AstarError {
