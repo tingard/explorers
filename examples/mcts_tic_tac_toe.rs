@@ -495,7 +495,7 @@ fn run_mcts() -> anyhow::Result<()> {
             // Update all states up to the expanded node
             backpropagate(
                 &mut mcts_history,
-                states_to_leaf.iter().chain([expanded_state].into_iter()),
+                states_to_leaf.iter().chain([expanded_state]),
                 rollout_winner,
             );
         }

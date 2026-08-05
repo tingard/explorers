@@ -5,7 +5,7 @@ mod value;
 
 use bon::bon;
 use num_traits::Num;
-use std::{fmt::Debug, marker::PhantomData, ops::Neg};
+use std::{fmt::Debug, marker::PhantomData};
 use tracing::debug;
 
 pub use self::action::Action;
@@ -61,7 +61,7 @@ impl<S, A, G, C> Planner<S, A, G, C>
 where
     S: State,
     A: Action<S, Cost = C> + Clone,
-    C: Num + Ord + Neg<Output = C> + Clone + Debug,
+    C: Num + Ord + Clone + Debug,
 {
     /// Create a new planner.
     ///
