@@ -68,10 +68,7 @@ impl HexNav {
             seen_hexes.insert(seed_cell);
             search_queue.push_back(seed_cell);
 
-            loop {
-                let Some(to_check) = search_queue.pop_front() else {
-                    break;
-                };
+            while let Some(to_check) = search_queue.pop_front() {
                 // Store this as an output cell if it is contained within the polygon
                 if self::hex::is_cell_contained_in_in_geometry(to_check, polygon) {
                     out.insert(to_check);
