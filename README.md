@@ -17,6 +17,7 @@ enum Edges {
     AddTwo,
 }
 
+let goal = 10i32;
 // Set up the search using the builder pattern
 let result = astar()
     // We provide a function to check if we've reached the goal
@@ -34,7 +35,7 @@ let result = astar()
     .heuristic(|i: &i32, g: &i32| (g - i).abs())
     // Limit the search depth to prevent infinite searching
     .max_nodes_searched(1_000_000)
-    .plan_path(&0i32, &10i32);
+    .plan_path(&0i32, &goal);
 // Check we found a path
 assert!(result.is_ok_and(|r| r.path[r.path.len() - 1].1 == goal));
 ```
